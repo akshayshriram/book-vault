@@ -1,14 +1,15 @@
 import express from "express";
-import createHttpError from "http-errors";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
+import userRotuer from "./user/userRouter";
 
 const app = express();
 
 // Example Route
 app.get("/", (req, res, next) => {
-    const error = createHttpError(400, "Something went wrong");
-    next(error); // pass error to the global error handler
+    res.json({ message: "Welcome to BookVault" });
 });
+
+app.use('/api/users', userRotuer)
 
 
 // Use the error handler middleware
