@@ -52,7 +52,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const token = sign({ sub: newUser._id }, config.jwtSecret as string, { expiresIn: "7d" })
 
-        res.json({ accessToken: token });
+        res.status(201).json({ accessToken: token });
 
     } catch (err) {
         return next(createHttpError(500, "Error while signing JWT token"))
@@ -61,4 +61,8 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 
 };
 
-export { createUser };
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+    res.json({ message: "OK" })
+}
+
+export { createUser, loginUser };

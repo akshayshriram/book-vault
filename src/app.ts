@@ -1,6 +1,6 @@
 import express from "express";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
-import userRotuer from "./user/userRouter";
+import userRouter from "./user/userRouter";
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.get("/", (req, res, next) => {
 });
 
 
-app.use('/api/users', userRotuer)
+app.use('/api/users', userRouter)
 
 
 // Use the error handler middleware
