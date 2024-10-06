@@ -23,6 +23,10 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
         return next(error);
     }
 
+    const hasdedPassword = await bcrypt.hash(password, 10);
+
+
+
     res.json({ message: "New user Registered..." });
 };
 
