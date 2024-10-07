@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bookRouter from "./bookRouter";
 import { Book } from "./bookTypes";
 
 const bookSchema = new mongoose.Schema<Book>({
@@ -8,7 +7,7 @@ const bookSchema = new mongoose.Schema<Book>({
         required: true
     },
     author: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true
     },
     coverImage: {
@@ -16,13 +15,14 @@ const bookSchema = new mongoose.Schema<Book>({
         required: true
     },
     file: {
-        title: String,
-        required: true``
+        type: String, // Update this to be a single String type
+        required: true
     },
     genre: {
-        title: String,
+        type: String, // Update this to be a single String type
         required: true
     }
 }, { timestamps: true })
+
 
 export default mongoose.model<Book>("Book", bookSchema)
