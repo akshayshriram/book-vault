@@ -50,13 +50,21 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
     console.log("file:", bookFileUploadResult);
     console.log("coverImage:", uploadResults);
 
-    const newBook = await bookModel.create({
-        title,
-        genre,
-        author: "6702728066ebe3e77008e6f0",
-        coverImage: uploadResults.secure_url,
-        file: bookFileUploadResult.secure_url
-    })
+    let newBook;
+    try {
+        newBook = await bookModel.create({
+            title,
+            genre,
+            author: "6702728066ebe3e77008e6f0",
+            coverImage: uploadResults.secure_url,
+            file: bookFileUploadResult.secure_url
+        });
+    } catch (error) {
+        console.log(error);
+
+        return next(createHttpError(500, "Error saving book to database!"));
+    }
+
 
 
     // Deleting temperary server files
