@@ -5,6 +5,7 @@ import fs from 'node:fs'
 import createHttpError from 'http-errors';
 import bookModel from './bookModel';
 import { AuthRequest } from '../middlewares/authenticate';
+import { UploadStream } from 'cloudinary';
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -83,4 +84,82 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
     res.status(201).json({ id: newBook._id })
 }
 
-export { createBook }
+const updateBook = async (req: Request, res: Response, next: NextFunction) => {
+
+    const { title, genre } = req.body;
+    // console.log("files:", req.files);
+    const bookId = req.params.bookId;
+
+    const book = await bookModel.findOne({ _id: bookId })
+
+    if (!book) {
+        return next(createHttpError(404, "Book Not Found"))
+    }
+
+    const _req = req as AuthRequest;
+    if (book.author.toString() !== _req.userId) {
+        return next(createHttpError(403, "You cannot others book!"))
+    }
+
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    let completeCoverImage = ""
+
+    // Update CoverImage
+    if (files?.coverImage) {
+        const fileName = files.coverImage[0].filename;
+        const coverImageMimeType = files.coverImage[0].mimetype.split("/").at(-1);
+        const filePath = path.resolve(__dirname, '../../public/data/uploads', fileName)
+        completeCoverImage = fileName
+
+        const uploadResults = await cloudinary.uploader.upload(filePath, {
+
+            filename_override: completeCoverImage,
+            folder: 'book-covers',
+            format: coverImageMimeType
+        })
+
+        completeCoverImage = uploadResults.secure_url;
+
+        await fs.promises.unlink(filePath);
+    }
+
+    // Update Pdf 
+    let completeFileName = ""
+    if (files.file) {
+        const bookFileName = files.file[0].filename;
+        const bookFilePath = path.resolve(__dirname, '../../public/data/uploads', bookFileName)
+        const bookMimeType = files.file[0].mimetype.split("/").at(-1);
+
+        completeFileName = bookFileName;
+
+        const bookFileUploadResult = await cloudinary.uploader.upload(bookFilePath, {
+            resource_type: 'raw',
+            filename_override: completeFileName,
+            folder: 'book-files',
+            format: bookMimeType
+        })
+
+        completeFileName = bookFileUploadResult.secure_url;
+
+        await fs.promises.unlink(bookFilePath);
+
+    }
+
+    const updateBook = await bookModel.findByIdAndUpdate(
+        {
+            _id: bookId
+        },
+        {
+            title: title,
+            genre: genre,
+            coverImage: completeCoverImage ? completeCoverImage : book.coverImage,
+            file: completeFileName ? completeFileName : book.file
+        },
+        { new: true }
+    );
+
+    res.json(updateBook);
+
+}
+
+export { createBook, updateBook }
