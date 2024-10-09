@@ -49,8 +49,8 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
 
 
 
-    console.log("file:", bookFileUploadResult);
-    console.log("coverImage:", uploadResults);
+    // console.log("file:", bookFileUploadResult);
+    // console.log("coverImage:", uploadResults);
 
     // console.log('userId:', req.userId);
 
@@ -66,7 +66,7 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
             file: bookFileUploadResult.secure_url
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
 
         return next(createHttpError(500, "Error saving book to database!"));
     }
