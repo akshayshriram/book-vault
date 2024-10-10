@@ -96,6 +96,7 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
         return next(createHttpError(404, "Book Not Found"))
     }
 
+    // Check user access
     const _req = req as AuthRequest;
     if (book.author.toString() !== _req.userId) {
         return next(createHttpError(403, "You cannot Update others book!"))
@@ -145,6 +146,38 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
 
     }
 
+    if (completeCoverImage) {
+        try {
+            // Public Id: book-covers/joiylkd8zaaakfwkf3rb
+            // coverImage: https://res.cloudinary.com/dwtol8z8t/image/upload/v1728376348/book-covers/joiylkd8zaaakfwkf3rb.png    
+            const coverFileSpilts = book.coverImage.split('/')
+            const coverImagePublicId = coverFileSpilts.at(-2) + '/' + coverFileSpilts.at(-1)?.split('.').at(-2);
+            // console.log(coverImagePublicId);
+
+            await cloudinary.uploader.destroy(coverImagePublicId)
+
+        } catch (err) {
+            return next(createHttpError(500, "Error while deleting coverImage!"))
+        }
+    }
+
+    if (completeFileName) {
+        try {
+            // Public Id: book-files/hzjo3k94zchhvmv0kzn0.pdf
+            // coverImage: https://res.cloudinary.com/dwtol8z8t/raw/upload/v1728376350/book-files/hzjo3k94zchhvmv0kzn0.pdf
+            const bookFileSpilts = book.file.split('/')
+            const bookFilePublicId = bookFileSpilts.at(-2) + '/' + bookFileSpilts.at(-1);
+            // console.log(bookFilePublicId);
+
+            await cloudinary.uploader.destroy(bookFilePublicId, {
+                resource_type: "raw",
+            })
+
+        } catch (err) {
+            return next(createHttpError(500, "Error while deleting pdf file!"))
+        }
+    }
+
     const updateBook = await bookModel.findByIdAndUpdate(
         {
             _id: bookId
@@ -157,6 +190,8 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
         },
         { new: true }
     );
+
+
 
     res.json(updateBook);
 
